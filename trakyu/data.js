@@ -2,8 +2,11 @@
 console.log("[Gantt] data.js loaded — BUBBLE_GANTT_DATA length:", (window.BUBBLE_GANTT_DATA || []).length);
 console.log("[Gantt] BUBBLE_GANTT_DATA sample (first 3):", (window.BUBBLE_GANTT_DATA || []).slice(0, 3));
 
-// Fix: strip duration before DHTMLX processes the data so end_date is never recalculated
-(window.BUBBLE_GANTT_DATA || []).forEach(function(task) { delete task.duration; });
+// Fix: strip duration and $calculate_duration before DHTMLX processes the data so end_date is never recalculated
+(window.BUBBLE_GANTT_DATA || []).forEach(function(task) {
+    delete task.duration;
+    delete task.$calculate_duration;
+});
 
 window.ganttData = {
   data: window.BUBBLE_GANTT_DATA || [],
@@ -42,6 +45,7 @@ window.refreshGanttData = function(tasks, links) {
         data: rawData.map(function(task) {
             var t = Object.assign({}, task);
             delete t.duration;
+            delete t.$calculate_duration;
             return t;
         }),
         links: links || window.BUBBLE_GANTT_LINKS || []
