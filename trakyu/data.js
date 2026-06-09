@@ -2,10 +2,11 @@
 console.log("[Gantt] data.js loaded — BUBBLE_GANTT_DATA length:", (window.BUBBLE_GANTT_DATA || []).length);
 console.log("[Gantt] BUBBLE_GANTT_DATA sample (first 3):", (window.BUBBLE_GANTT_DATA || []).slice(0, 3));
 
-// Fix: strip duration and $calculate_duration before DHTMLX processes the data so end_date is never recalculated
+// Fix: strip duration/$calculate_duration and override type:project so DHTMLX never recalculates end_date
 (window.BUBBLE_GANTT_DATA || []).forEach(function(task) {
     delete task.duration;
     delete task.$calculate_duration;
+    if (task.type === "project") task.type = "task";
 });
 
 window.ganttData = {
@@ -46,6 +47,7 @@ window.refreshGanttData = function(tasks, links) {
             var t = Object.assign({}, task);
             delete t.duration;
             delete t.$calculate_duration;
+            if (t.type === "project") t.type = "task";
             return t;
         }),
         links: links || window.BUBBLE_GANTT_LINKS || []
