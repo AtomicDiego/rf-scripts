@@ -2,21 +2,23 @@
 console.log("[Gantt] data.js loaded — BUBBLE_GANTT_DATA length:", (window.BUBBLE_GANTT_DATA || []).length);
 console.log("[Gantt] BUBBLE_GANTT_DATA sample (first 3):", (window.BUBBLE_GANTT_DATA || []).slice(0, 3));
 
+// Fix: strip duration before DHTMLX processes the data so end_date is never recalculated
+(window.BUBBLE_GANTT_DATA || []).forEach(function(task) { delete task.duration; });
+
 window.ganttData = {
   data: window.BUBBLE_GANTT_DATA || [],
   links: window.BUBBLE_GANTT_LINKS || []
 };
-
 console.log("[Gantt] window.ganttData set:", window.ganttData);
 
 // Validate Gantt data before parsing
 var validateDates = function(tasks) {
   tasks.forEach(task => {
     if (!task.start_date || isNaN(new Date(task.start_date).getTime())) {
-      console.error(`Invalid start_date for task ID ${task.id}:`, task.start_date);
+      console.error("Invalid start_date for task ID " + task.id + ":", task.start_date);
     }
     if (!task.end_date || isNaN(new Date(task.end_date).getTime())) {
-      console.error(`Invalid end_date for task ID ${task.id}:`, task.end_date);
+      console.error("Invalid end_date for task ID " + task.id + ":", task.end_date);
     }
   });
 };
@@ -24,7 +26,7 @@ var validateDates = function(tasks) {
 // Validate data before parsing
 gantt.attachEvent("onBeforeParse", function(data) {
   if (data && data.data) validateDates(data.data);
-  return true; // Continue parsing
+  return true;
 });
 
 // gantt.parse() is now called in init.js after gantt.init() — see Fix #4
@@ -46,11 +48,13 @@ window.refreshGanttData = function(tasks, links) {
     };
     gantt.clearAll();
     gantt.parse(fresh);
+    if (typeof restoreOpenTasks === "function") restoreOpenTasks();
+    gantt.scrollTo(scroll.x, scroll.y);
+};
 
 // Función para manejar la búsqueda dinámica
 // Fix #5: track the event id so we can detach the previous handler before adding a new one
 var _searchEventId = null;
-
 function applySearch(busqueda) {
   if (busqueda) {
     gantt.eachTask(function(task) {
@@ -64,25 +68,20 @@ function applySearch(busqueda) {
       }
     });
   }
-
   // Detach previous handler to avoid accumulation
   if (_searchEventId !== null) {
     gantt.detachEvent(_searchEventId);
     _searchEventId = null;
   }
-
   _searchEventId = gantt.attachEvent("onBeforeTaskDisplay", function(id, task) {
     if (!busqueda) return true;
     if (task.text.toLowerCase().indexOf(busqueda.toLowerCase()) !== -1) return true;
-
     var hasVisibleChild = false;
     gantt.eachTask(function(child) {
       if (child.text.toLowerCase().indexOf(busqueda.toLowerCase()) !== -1) hasVisibleChild = true;
     }, id);
-
     return hasVisibleChild;
   });
-
   gantt.render();
 }
 
