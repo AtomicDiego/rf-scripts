@@ -263,7 +263,7 @@ gantt.attachEvent("onBeforeLinkAdd", function(_id, link) {
 gantt.license = "40762312";
 
 // Enable Pro features
-gantt.config.auto_scheduling = true;
+gantt.config.auto_scheduling = false;
 gantt.config.undo = true;
 gantt.config.drag_progress = false; // remove progress drag arrow
 gantt.config.drag_links = true;     // enable dependency drawing
