@@ -35,18 +35,17 @@ gantt.attachEvent("onBeforeParse", function(data) {
 // Usage: refreshGanttData(BUBBLE_GANTT_DATA, BUBBLE_GANTT_LINKS)
 window.refreshGanttData = function(tasks, links) {
     var scroll = gantt.getScrollState();
+    var rawData = tasks || window.BUBBLE_GANTT_DATA || [];
     var fresh = {
-        data:  tasks || window.BUBBLE_GANTT_DATA  || [],
+        data: rawData.map(function(task) {
+            var t = Object.assign({}, task);
+            delete t.duration;
+            return t;
+        }),
         links: links || window.BUBBLE_GANTT_LINKS || []
     };
-
     gantt.clearAll();
     gantt.parse(fresh);
-
-    if (typeof restoreOpenTasks === "function") restoreOpenTasks();
-    // Restore scroll after restoreOpenTasks (which calls gantt.render internally)
-    gantt.scrollTo(scroll.x, scroll.y);
-};
 
 // Función para manejar la búsqueda dinámica
 // Fix #5: track the event id so we can detach the previous handler before adding a new one
