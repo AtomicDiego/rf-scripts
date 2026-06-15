@@ -303,3 +303,88 @@ var tooltipManager = (function() {
 
 // Example usage
 tooltipManager.attachTooltipEvents('tooltip-no-acceso');
+
+// --- Edición de avance inline en columna ---
+// Sobreescribe el template de la columna "avance" para tareas hoja (sin hijos)
+// Al hacer click muestra un input numérico; al confirmar actualiza progress y notifica a Bubble.
+(function() {
+    // Espera a que el Gantt esté inicializado antes de sobreescribir el template
+    document.addEventListener("ganttDataReady", function() {
+        var avanceCol = gantt.config.columns.find(function(c) { return c.name === "avance"; });
+        if (!avanceCol) return;
+
+        avanceCol.template = function(task) {
+            // Tareas padre: promedio ponderado (solo lectura)
+            if (gantt.hasChild(task.id)) {
+                var totalDays = 0, weightedSum = 0;
+                gantt.eachTask(function(child) {
+                    if (gantt.hasChild(child.id)) return;
+                    var days = Math.round((child.end_date - child.start_date) / 86400000);
+                    totalDays += days;
+                    weightedSum += days * (child.progress || 0);
+                }, task.id);
+                var pct = totalDays > 0 ? Math.round(weightedSum / totalDays * 100) : 0;
+                return "<span class='avance-readonly'>" + pct + "%</span>";
+            }
+            // Tareas hoja: clickeable para editar
+            var pct = Math.round((task.progress || 0) * 100);
+            return "<span class='avance-editable' data-task-id='" + task.id + "'>" + pct + "%</span>";
+        };
+
+        gantt.render();
+    }, { once: true });
+
+    // Delegación de eventos: click en .avance-editable abre input inline
+    document.addEventListener("click", function(e) {
+        var span = e.target.closest ? e.target.closest(".avance-editable") : null;
+        if (!span) return;
+
+        var taskId = span.getAttribute("data-task-id");
+        if (!taskId || !gantt.isTaskExists(taskId)) return;
+
+        var task = gantt.getTask(taskId);
+        if (isCompleted(task)) return; // no editar tareas completadas
+
+        var currentPct = Math.round((task.progress || 0) * 100);
+
+        // Reemplazar span con input
+        var input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.max = "100";
+        input.value = currentPct;
+        input.className = "avance-input";
+        input.style.cssText = "width:60px;text-align:center;border:1px solid #2196f3;border-radius:3px;padding:1px 4px;font-size:12px;";
+
+        span.parentNode.replaceChild(input, span);
+        input.focus();
+        input.select();
+
+        function commitEdit() {
+            var raw = parseInt(input.value, 10);
+            if (isNaN(raw)) raw = currentPct;
+            raw = Math.max(0, Math.min(100, raw));
+
+            task.progress = raw / 100;
+            gantt.updateTask(taskId);
+            gantt.render();
+
+            // Notificar a Bubble via fn_updateProgress
+            if (typeof bubble_fn_updateProgress === "function") {
+                _queueBubble("progress_update_" + taskId, bubble_fn_updateProgress, {
+                    output1: Number(taskId),
+                    output2: raw
+                });
+            }
+        }
+
+        input.addEventListener("blur", commitEdit);
+        input.addEventListener("keydown", function(ev) {
+            if (ev.key === "Enter") { input.blur(); }
+            if (ev.key === "Escape") {
+                task.progress = currentPct / 100;
+                gantt.render();
+            }
+        });
+    });
+})();
