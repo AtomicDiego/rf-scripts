@@ -292,7 +292,7 @@ tooltipManager.attachTooltipEvents('tooltip-no-acceso');
         + '</svg>';
 
     // SVG de check para completar tarea
-    var CHECK_SVG = '<svg class="avance-complete-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-left:4px;cursor:pointer;opacity:0.5;flex-shrink:0;">'
+var CHECK_SVG = '<svg class="avance-complete-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-left:6px;cursor:pointer;flex-shrink:0;">'
         + '<polyline points="20 6 9 17 4 12"/>'
         + '</svg>';
 
