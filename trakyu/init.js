@@ -230,7 +230,7 @@ gantt.attachEvent("onBeforeLinkAdd", function(_id, link) {
     var source = gantt.isTaskExists(link.source) ? gantt.getTask(link.source) : null;
     var target = gantt.isTaskExists(link.target) ? gantt.getTask(link.target) : null;
     if ((source && isCompleted(source)) || (target && isCompleted(target))) return false;
-    return link.type === gantt.config.links.finish_to_start;
+    return true;
 });
 // Add the license key for dhtmlX Gantt Pro
 gantt.license = "40762312";
