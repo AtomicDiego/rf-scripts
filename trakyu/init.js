@@ -4,8 +4,8 @@ console.log("[Gantt] init.js loaded");
 // of whether functions.js has loaded yet. functions.js will redefine them — that's fine.
 function isCompleted(task) { return task.progress >= 1; }
 function calcularAvance(task) { return Math.round((task.progress || 0) * 100); }
-// Fix #1: Single plugins() call — auto_scheduling removed from plugins to avoid recalculation
-gantt.plugins({ quick_info: true, tool_tip: true, marker: true, export_api: true, undo: true });
+// Fix #1: Single plugins() call con auto_scheduling habilitado
+gantt.plugins({ quick_info: true, tool_tip: true, marker: true, export_api: true, undo: true, auto_scheduling: true });
 var today = new Date();
 gantt.addMarker({
   start_date: today,
@@ -20,8 +20,8 @@ gantt.config.row_height = 30;
 gantt.config.bar_height = 20;
 gantt.config.date_format = "%Y-%m-%d %H:%i";
 gantt.config.work_time = false;
-// Fix #2: Disable auto_scheduling so DHTMLX respects start_date/end_date from Bubble as-is
-gantt.config.auto_scheduling = false;
+// auto_scheduling habilitado para reprogramación automática por tipo de dependencia
+gantt.config.auto_scheduling = true;
 gantt.config.schedule_from_end = false;
 // --- Column width persistence ---
 var COL_WIDTHS_KEY = "trakyu_col_widths";
@@ -287,8 +287,8 @@ gantt.attachEvent("onLinkDblClick", function(id) {
 });
 // Add the license key for dhtmlX Gantt Pro
 gantt.license = "40762312";
-// Fix #3: Disable auto_scheduling and schedule_from_end so end_date from Bubble is never overridden
-gantt.config.auto_scheduling = false;
+// auto_scheduling habilitado — ver nota arriba
+gantt.config.auto_scheduling = true;
 gantt.config.schedule_from_end = false;
 gantt.config.undo = true;
 gantt.config.drag_progress = false; // remove progress drag arrow
