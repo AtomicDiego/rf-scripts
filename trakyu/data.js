@@ -7,14 +7,6 @@ console.log("[Gantt] BUBBLE_GANTT_DATA sample (first 3):", (window.BUBBLE_GANTT_
     delete task.$calculate_duration;
     if (task.type === "project") task.type = "task";
 });
-// Asignar sort_order solo si está vacío (una sola vez por task)
-var _sortIndex = 0;
-(window.BUBBLE_GANTT_DATA || []).forEach(function(task) {
-    _sortIndex += 10;
-    if (!task.sort_order) {
-        bubble_fn_sort_order(task.bubble_id + "," + _sortIndex);
-    }
-});
 window.ganttData = {
   data: window.BUBBLE_GANTT_DATA || [],
   links: window.BUBBLE_GANTT_LINKS || []
