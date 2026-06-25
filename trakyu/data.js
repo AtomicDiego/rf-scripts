@@ -12,7 +12,7 @@ var _sortIndex = 0;
 (window.BUBBLE_GANTT_DATA || []).forEach(function(task) {
     _sortIndex += 10;
     if (!task.sort_order) {
-        bubble_fn_sort_order({ outputvalue: task.bubble_id + "," + _sortIndex });
+        bubble_fn_sort_order(task.bubble_id + "," + _sortIndex);
     }
 });
 window.ganttData = {
