@@ -471,15 +471,17 @@ function initGantt() {
         console.error("[Gantt] gantt.parse() FAILED:", e);
     }
     // Asignar sort_order en orden jerárquico exacto del Gantt (solo si está vacío)
-    if (typeof bubble_fn_sort_order === "function") {
-        var _sortIdx = 0;
-        gantt.eachTask(function(task) {
-            _sortIdx += 10;
-            if (!task.sort_order) {
-                bubble_fn_sort_order(task.bubble_id + "," + _sortIdx);
-            }
-        });
-    }
+    setTimeout(function() {
+        if (typeof bubble_fn_sort_order === "function") {
+            var _sortIdx = 0;
+            gantt.eachTask(function(task) {
+                _sortIdx += 10;
+                if (!task.sort_order) {
+                    bubble_fn_sort_order(task.bubble_id + "," + _sortIdx);
+                }
+            });
+        }
+    }, 1000);
     restoreOpenTasks();
     if (typeof restorePersistedScroll === "function") restorePersistedScroll();
     if (typeof initSCurve === "function") initSCurve();
