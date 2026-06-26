@@ -44,6 +44,13 @@ gantt.attachEvent("onBeforeParse", function(data) {
 window.refreshGanttData = function(tasks, links) {
     var scroll = gantt.getScrollState();
     var rawData = tasks || window.BUBBLE_GANTT_DATA || [];
+    // Reconstruir _sortOrderMap con los datos frescos
+    window._sortOrderMap = {};
+    rawData.forEach(function(task) {
+        if (task.bubble_id && task.sort_order) {
+            window._sortOrderMap[task.bubble_id] = parseInt(task.sort_order, 10);
+        }
+    });
     var fresh = {
         data: rawData.map(function(task) {
             var t = Object.assign({}, task);
