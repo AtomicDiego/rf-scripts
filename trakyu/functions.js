@@ -100,9 +100,14 @@ gantt.attachEvent("onRowDragEnd", function(id, target) {
     var movedTask = gantt.getTask(id);
     var targetTask = gantt.getTask(targetId);
 
+    var movedSort = parseInt(movedTask.sort_order, 10) || 0;
+    var targetSort = parseInt(targetTask.sort_order, 10) || 0;
+
+    if (!movedSort || !targetSort) return;
+
     _queueBubble("task_reorder_" + id + "_" + targetId, bubble_fn_change_order,
-        movedTask.bubble_id + "," + movedTask.sort_order + "," +
-        targetTask.bubble_id + "," + targetTask.sort_order
+        movedTask.bubble_id + "," + movedSort + "," +
+        targetTask.bubble_id + "," + targetSort
     );
 });
 
