@@ -85,34 +85,33 @@ gantt.attachEvent("onAfterTaskUpdate", function(id, item) {
     }
 });
 
-// Reorder Tasks — swap sort_order entre la task movida y la task destino
+// Reorder Tasks — renumera todas las tasks en el orden visual actual del Gantt
 gantt.attachEvent("onRowDragEnd", function(id, target) {
-    if (typeof bubble_fn_change_order !== "function") return;
+    if (typeof bubble_fn_sort_order !== "function") return;
 
-    // Normalizar target: "next:X" significa "después de X" (al arrastrar al último)
-    var targetId = target;
-    if (typeof target === "string" && target.indexOf("next:") === 0) {
-        targetId = target.replace("next:", "");
-    }
+    var newOrder = [];
+    var _sortIdx = 0;
+    gantt.eachTask(function(task) {
+        _sortIdx += 10;
+        newOrder.push({ bubble_id: task.bubble_id, newSort: _sortIdx });
+    });
 
-    if (!gantt.isTaskExists(id) || !gantt.isTaskExists(targetId)) return;
+    // Filtrar solo las tasks cuyo sort_order cambió
+    var changed = newOrder.filter(function(item) {
+        return (window._sortOrderMap && window._sortOrderMap[item.bubble_id]) !== item.newSort;
+    });
 
-    var movedTask = gantt.getTask(id);
-    var targetTask = gantt.getTask(targetId);
+    // Actualizar el mapa local
+    changed.forEach(function(item) {
+        if (window._sortOrderMap) window._sortOrderMap[item.bubble_id] = item.newSort;
+    });
 
-    var movedSort = (window._sortOrderMap && window._sortOrderMap[movedTask.bubble_id]) || 0;
-    var targetSort = (window._sortOrderMap && window._sortOrderMap[targetTask.bubble_id]) || 0;
-
-    if (!movedSort || !targetSort) return;
-
-    // Actualizar el mapa local con el swap
-    window._sortOrderMap[movedTask.bubble_id] = targetSort;
-    window._sortOrderMap[targetTask.bubble_id] = movedSort;
-
-    _queueBubble("task_reorder_" + id + "_" + targetId, bubble_fn_change_order,
-        movedTask.bubble_id + "," + movedSort + "," +
-        targetTask.bubble_id + "," + targetSort
-    );
+    // Enviar a Bubble con delay para respetar el Queue
+    changed.forEach(function(item, i) {
+        setTimeout(function() {
+            bubble_fn_sort_order(item.bubble_id + "," + item.newSort);
+        }, i * 200);
+    });
 });
 
 // Delete Tasks
