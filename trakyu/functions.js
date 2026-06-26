@@ -85,40 +85,33 @@ gantt.attachEvent("onAfterTaskUpdate", function(id, item) {
     }
 });
 
-// Reorder Tasks
-gantt.attachEvent("onAfterRowReorder", function(id) {
-    if (typeof bubble_fn_reorderTask !== "function") return;
+// Reorder Tasks — swap sort_order entre la task movida y la task destino
+var _reorderSourceSortOrder = null;
 
+gantt.attachEvent("onBeforeRowReorder", function(id) {
+    var task = gantt.getTask(id);
+    _reorderSourceSortOrder = task.sort_order;
+    return true;
+});
+
+gantt.attachEvent("onAfterRowReorder", function(id) {
+    if (typeof bubble_fn_change_order !== "function") return;
+    if (!_reorderSourceSortOrder) return;
+
+    var movedTask = gantt.getTask(id);
     var ordered = [];
     gantt.eachTask(function(t) { ordered.push(t); });
-
-    var pos = -1;
-    for (var i = 0; i < ordered.length; i++) {
-        if (String(ordered[i].id) === String(id)) { pos = i; break; }
-    }
+    var pos = ordered.findIndex(function(t) { return String(t.id) === String(id); });
     if (pos === -1) return;
 
-    var prev = pos > 0 ? ordered[pos - 1] : null;
-    var next = pos < ordered.length - 1 ? ordered[pos + 1] : null;
-    var prevIndex = prev && prev.index != null ? prev.index : null;
-    var nextIndex = next && next.index != null ? next.index : null;
+    var targetTask = pos > 0 ? ordered[pos - 1] : ordered[pos + 1];
+    if (!targetTask) return;
 
-    var newIndex;
-    if (prevIndex !== null && nextIndex !== null) {
-        newIndex = (prevIndex + nextIndex) / 2;
-    } else if (prevIndex !== null) {
-        newIndex = prevIndex + 1;
-    } else if (nextIndex !== null) {
-        newIndex = nextIndex - 1;
-    } else {
-        return;
-    }
-
-    var task = gantt.getTask(id);
-    _queueBubble("task_reorder", bubble_fn_reorderTask, {
-        output1: task.bubble_id,
-        output2: newIndex
-    });
+    _queueBubble("task_reorder", bubble_fn_change_order,
+        movedTask.bubble_id + "," + _reorderSourceSortOrder + "," +
+        targetTask.bubble_id + "," + targetTask.sort_order
+    );
+    _reorderSourceSortOrder = null;
 });
 
 // Delete Tasks
