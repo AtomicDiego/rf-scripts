@@ -88,12 +88,19 @@ gantt.attachEvent("onAfterTaskUpdate", function(id, item) {
 // Reorder Tasks — swap sort_order entre la task movida y la task destino
 gantt.attachEvent("onRowDragEnd", function(id, target) {
     if (typeof bubble_fn_change_order !== "function") return;
-    if (!gantt.isTaskExists(id) || !gantt.isTaskExists(target)) return;
+
+    // Normalizar target: "next:X" significa "después de X" (al arrastrar al último)
+    var targetId = target;
+    if (typeof target === "string" && target.indexOf("next:") === 0) {
+        targetId = target.replace("next:", "");
+    }
+
+    if (!gantt.isTaskExists(id) || !gantt.isTaskExists(targetId)) return;
 
     var movedTask = gantt.getTask(id);
-    var targetTask = gantt.getTask(target);
+    var targetTask = gantt.getTask(targetId);
 
-    _queueBubble("task_reorder_" + id + "_" + target, bubble_fn_change_order,
+    _queueBubble("task_reorder_" + id + "_" + targetId, bubble_fn_change_order,
         movedTask.bubble_id + "," + movedTask.sort_order + "," +
         targetTask.bubble_id + "," + targetTask.sort_order
     );
