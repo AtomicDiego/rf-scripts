@@ -476,13 +476,13 @@ function initGantt() {
     (function _waitAndAssignSortOrder(attempts) {
         if (typeof bubble_fn_sort_order === "function") {
             var _sortIdx = 0;
-            gantt.eachTask(function(task) {
-                _sortIdx += 10;
-                task._tmpSortIdx = _sortIdx;
-            });
             var pending = [];
             gantt.eachTask(function(task) {
-                if (!task.sort_order) pending.push(task);
+                _sortIdx += 10;
+                if (!task.sort_order) {
+                    task._tmpSortIdx = _sortIdx;
+                    pending.push(task);
+                }
             });
             pending.forEach(function(task, i) {
                 setTimeout(function() {
