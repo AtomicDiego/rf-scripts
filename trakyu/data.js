@@ -7,6 +7,14 @@ console.log("[Gantt] BUBBLE_GANTT_DATA sample (first 3):", (window.BUBBLE_GANTT_
     delete task.$calculate_duration;
     if (task.type === "project") task.type = "task";
 });
+// Mapa de sort_order por bubble_id para acceso rápido desde eventos de DHTMLX
+// (DHTMLX descarta campos custom en el objeto task interno)
+window._sortOrderMap = {};
+(window.BUBBLE_GANTT_DATA || []).forEach(function(task) {
+    if (task.bubble_id && task.sort_order) {
+        window._sortOrderMap[task.bubble_id] = parseInt(task.sort_order, 10);
+    }
+});
 window.ganttData = {
   data: window.BUBBLE_GANTT_DATA || [],
   links: window.BUBBLE_GANTT_LINKS || []
