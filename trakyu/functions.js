@@ -100,10 +100,14 @@ gantt.attachEvent("onRowDragEnd", function(id, target) {
     var movedTask = gantt.getTask(id);
     var targetTask = gantt.getTask(targetId);
 
-    var movedSort = parseInt(movedTask.sort_order, 10) || 0;
-    var targetSort = parseInt(targetTask.sort_order, 10) || 0;
+    var movedSort = (window._sortOrderMap && window._sortOrderMap[movedTask.bubble_id]) || 0;
+    var targetSort = (window._sortOrderMap && window._sortOrderMap[targetTask.bubble_id]) || 0;
 
     if (!movedSort || !targetSort) return;
+
+    // Actualizar el mapa local con el swap
+    window._sortOrderMap[movedTask.bubble_id] = targetSort;
+    window._sortOrderMap[targetTask.bubble_id] = movedSort;
 
     _queueBubble("task_reorder_" + id + "_" + targetId, bubble_fn_change_order,
         movedTask.bubble_id + "," + movedSort + "," +
