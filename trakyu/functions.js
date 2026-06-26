@@ -93,7 +93,7 @@ gantt.attachEvent("onRowDragEnd", function(id, target) {
     var movedTask = gantt.getTask(id);
     var targetTask = gantt.getTask(target);
 
-    _queueBubble("task_reorder", bubble_fn_change_order,
+    _queueBubble("task_reorder_" + id + "_" + target, bubble_fn_change_order,
         movedTask.bubble_id + "," + movedTask.sort_order + "," +
         targetTask.bubble_id + "," + targetTask.sort_order
     );
