@@ -86,32 +86,17 @@ gantt.attachEvent("onAfterTaskUpdate", function(id, item) {
 });
 
 // Reorder Tasks — swap sort_order entre la task movida y la task destino
-var _reorderSourceSortOrder = null;
-
-gantt.attachEvent("onBeforeRowReorder", function(id) {
-    var task = gantt.getTask(id);
-    _reorderSourceSortOrder = task.sort_order;
-    return true;
-});
-
-gantt.attachEvent("onAfterRowReorder", function(id) {
+gantt.attachEvent("onRowDragEnd", function(id, target) {
     if (typeof bubble_fn_change_order !== "function") return;
-    if (!_reorderSourceSortOrder) return;
+    if (!gantt.isTaskExists(id) || !gantt.isTaskExists(target)) return;
 
     var movedTask = gantt.getTask(id);
-    var ordered = [];
-    gantt.eachTask(function(t) { ordered.push(t); });
-    var pos = ordered.findIndex(function(t) { return String(t.id) === String(id); });
-    if (pos === -1) return;
-
-    var targetTask = pos > 0 ? ordered[pos - 1] : ordered[pos + 1];
-    if (!targetTask) return;
+    var targetTask = gantt.getTask(target);
 
     _queueBubble("task_reorder", bubble_fn_change_order,
-        movedTask.bubble_id + "," + _reorderSourceSortOrder + "," +
+        movedTask.bubble_id + "," + movedTask.sort_order + "," +
         targetTask.bubble_id + "," + targetTask.sort_order
     );
-    _reorderSourceSortOrder = null;
 });
 
 // Delete Tasks
