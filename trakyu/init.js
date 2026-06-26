@@ -472,14 +472,22 @@ function initGantt() {
     }
     // Asignar sort_order en orden jerárquico exacto del Gantt (solo si está vacío)
     // Polling: espera hasta que bubble_fn_sort_order esté disponible (máx 10s)
+    // Las llamadas se espacian 200ms para respetar el Queue de Bubble
     (function _waitAndAssignSortOrder(attempts) {
         if (typeof bubble_fn_sort_order === "function") {
             var _sortIdx = 0;
             gantt.eachTask(function(task) {
                 _sortIdx += 10;
-                if (!task.sort_order) {
-                    bubble_fn_sort_order(task.bubble_id + "," + _sortIdx);
-                }
+                task._tmpSortIdx = _sortIdx;
+            });
+            var pending = [];
+            gantt.eachTask(function(task) {
+                if (!task.sort_order) pending.push(task);
+            });
+            pending.forEach(function(task, i) {
+                setTimeout(function() {
+                    bubble_fn_sort_order(task.bubble_id + "," + task._tmpSortIdx);
+                }, i * 200);
             });
         } else if (attempts > 0) {
             setTimeout(function() { _waitAndAssignSortOrder(attempts - 1); }, 500);
